@@ -1,0 +1,133 @@
+##
+## This file is part of the libopencm3 project.
+##
+## Copyright (C) 2009 Uwe Hermann <uwe@hermann-uwe.de>
+## Copyright (C) 2010 Piotr Esden-Tempski <piotr@esden.net>
+## Copyright (C) 2013-2014 Rikard Lindström <ornotermes@gmail.com>
+##
+## This library is free software: you can redistribute it and/or modify
+## it under the terms of the GNU Lesser General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This library is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Lesser General Public License for more details.
+##
+## You should have received a copy of the GNU Lesser General Public License
+## along with this library.  If not, see <http://www.gnu.org/licenses/>.
+##
+
+PREFIX	?= arm-none-eabi
+CC		= $(PREFIX)-g++
+LD		= $(PREFIX)-gcc
+OBJCOPY		= $(PREFIX)-objcopy
+OBJDUMP		= $(PREFIX)-objdump
+GDB		= $(PREFIX)-gdb --tui
+SIZE		= $(PREFIX)-size
+
+TOOLCHAIN_DIR	= $(USER)/gcc-arm-none-eabi/gcc-arm-none-eabi
+INCLUDE_DIR	= $(TOOLCHAIN_DIR)/include
+LIB_DIR		= $(TOOLCHAIN_DIR)/lib
+BIN_DIR		= $(TOOLCHAIN_DIR)/bin
+
+ARCH_FLAGS      = -mthumb -mcpu=cortex-m3 -msoft-float
+CFLAGS		+= -c -g -std=c++11 \
+		   -Wall -Wextra \
+		   -Wredundant-decls \
+		   -Wundef -Wshadow \
+		   -I$(INCLUDE_DIR) \
+		   -fno-common $(ARCH_FLAGS) -MD -DSTM32F1
+LDSCRIPT	?= $(BINARY).ld
+LDFLAGS		+= --static -Wl,--start-group -lc -lstdc++ -lrdimon -lm -lgcc -Wl,--end-group \
+		   -L$(LIB_DIR) \
+		   -T$(LDSCRIPT) -nostartfiles -Wl,--gc-sections \
+		   $(ARCH_FLAGS) -mfix-cortex-m3-ldrd
+
+
+OBJS		+= $(BINARY).o
+
+# Be silent per default, but 'make V=1' will show all compiler calls.
+ ifneq ($(V),1)
+ Q := @
+ NULL := 2>/dev/null
+ else
+LDFLAGS += -Wl,--print-gc-sections
+ endif
+
+.SUFFIXES: .elf .bin .hex .srec .list .images
+.SECONDEXPANSION:
+.SECONDARY:
+
+all: images
+
+images: $(BINARY).images
+flash: $(BINARY).flash
+debug: $(BINARY).debug
+
+%.images: %.bin %.hex %.srec %.list
+	@#echo "*** $* images generated ***"
+	$(Q)$(SIZE) $(BINARY).elf
+
+%.bin: %.elf
+	@#printf "  OBJCOPY $(*).bin\n"
+	$(Q)$(OBJCOPY) -Obinary $(*).elf $(*).bin
+
+%.hex: %.elf
+	@#printf "  OBJCOPY $(*).hex\n"
+	$(Q)$(OBJCOPY) -Oihex $(*).elf $(*).hex
+
+%.srec: %.elf
+	@#printf "  OBJCOPY $(*).srec\n"
+	$(Q)$(OBJCOPY) -Osrec $(*).elf $(*).srec
+
+%.list: %.elf
+	@#printf "  OBJDUMP $(*).list\n"
+	$(Q)$(OBJDUMP) -S $(*).elf > $(*).list
+
+%.elf: $(OBJS) $(LDSCRIPT)
+	@#printf "  LD      $(subst $(shell pwd)/,,$(@))\n"
+	$(Q)$(LD) -o $(*).elf $(OBJS) -lopencm3_stm32f1 $(LDFLAGS)
+
+%.o: %.cpp Makefile
+	@#printf "  CC      $(subst $(shell pwd)/,,$(@))\n"
+	$(Q)$(CC) $(CFLAGS) -o $@ -c $<
+
+clean:
+	$(Q)rm -f *.o
+	$(Q)rm -f *.d
+	$(Q)rm -f *.elf
+	$(Q)rm -f *.bin
+	$(Q)rm -f *.hex
+	$(Q)rm -f *.srec
+	$(Q)rm -f *.list
+
+%.flash: %.images
+	@echo "  GDB   $(*).elf (flash)"
+	$(Q)$(GDB) --batch \
+		-ex "target remote :3333" \
+		-ex "monitor reset halt" \
+		-ex "load" \
+		-ex "monitor reset" \
+		$(*).elf
+
+%.debug: %.images
+	@echo "  GDB   $(*).elf (debug)"
+	$(Q)$(GDB) \
+		-ex "set height 0" \
+		-ex "set history save on" \
+		-ex "set history filename ~/.gdb-history-arm" \
+		-ex "set history size 1000" \
+		-ex "set remote hardware-breakpoint-limit 6" \
+		-ex "set remote hardware-watchpoint-limit 4" \
+		-ex "target remote :3333" \
+		-ex "monitor reset halt" \
+		-ex "load" \
+		-ex "monitor reset" \
+		$(*).elf
+
+.PHONY: images clean
+
+-include $(OBJS:.o=.d)
+
