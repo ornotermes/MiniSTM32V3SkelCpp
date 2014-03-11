@@ -21,11 +21,13 @@
 //---- Includes headers ------------------------------------------------------//
 
 #include <libopencm3/stm32/f1/gpio.h>
+#include <cmath>
+#include <utility>
 
 namespace Color
 {
 	const uint16_t Black =		0x0000;
-	const uint16_t White =		0x0000;
+	const uint16_t White =		0xffff;
 	const uint16_t Gray =		0x39ee;
 	const uint16_t Red =		0xf800;
 	const uint16_t DarkRed =	0x3800;
@@ -79,6 +81,10 @@ public:
 	void Clear(uint16_t color);
 	void Set(uint16_t x, uint16_t y, uint16_t color);
 	uint16_t Get(uint16_t x, uint16_t y);
+	void Fill (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Line (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Rect (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Rect (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
 };
 
 #include "lcd-ili9325.cpp"

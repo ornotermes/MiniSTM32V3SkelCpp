@@ -300,17 +300,7 @@ void lcdILI9325::Clear(uint16_t color)
 
 	const uint16_t w = GetWidth();
 	const uint16_t h = GetWidth();
-	for	(uint16_t y = 0; y < h; y++)
-	{
-		GoTo(0, y);
-		_cs(0);
-		_command(0x0022);
-		for (uint16_t x = 0; x < w; x++)
-		{
-			_dataWrite( color );
-		}
-		_cs(1);
-	}
+	Fill(0,0, w,h, color);
 }
 void lcdILI9325::Set(uint16_t x, uint16_t y, uint16_t color)
 {
@@ -325,7 +315,64 @@ uint16_t lcdILI9325::Get(uint16_t x, uint16_t y)
 	c = (tc & 0x07e0);
 	c |= (tc >> 11);
 	c |= (tc << 11);
+	return c;
 }
 
+void lcdILI9325::Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
+{
+	if (x1 > x2) std::swap(x1, x2);
+	if (y1 > y2) std::swap(x1, x2);
+	for	(uint16_t y = y1; y <= y2; y++)
+	{
+		GoTo(x1, y);
+		_cs(0);
+		_command(0x0022);
+		for (uint16_t x = x1; x <= x2; x++)
+		{
+			_dataWrite( color );
+		}
+		_cs(1);
+	}
+}
+void lcdILI9325::Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
+{
+	int16_t sx, sy;
+	uint16_t dx = std::abs(x1 - x2);
+	uint16_t dy = std::abs(y1 - y2);
+	if (x1 < x2) sx = 1;
+	else sx = -1;
+	if (y1 < y2) sy = 1;
+	else sy = -1;
+	int16_t err = dx-dy;
+	
+	while(1)
+	{
+		Set(x1,y1, color);
+		if (x1 == x2 && y1 == y2) break;
+		int16_t e2 = 2 * err;
+		if (e2 > -dy)
+		{
+			err -= dy;
+			x1 += sx;
+		}
+		if (e2 < dx)
+		{
+			err += dx;
+			y1 += sy;
+		}
+	}
+}
+void lcdILI9325::Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
+{
+	Line(x1,y1, x2,y1, color);
+	Line(x2,y1, x2,y2, color);
+	Line(x2,y2, x1,y2, color);
+	Line(x1,y2, x1,y1, color);
+}
+void lcdILI9325::Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill)
+{
+	Fill(x1,y1, x2,y2, fill);
+	Rect(x1,y1, x2,y2, color);
+}
 
 #endif

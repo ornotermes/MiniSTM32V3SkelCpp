@@ -38,8 +38,15 @@ int main(void)
 	lcdILI9325 Display(GPIOB, GPIOC, GPIOC, GPIO8, GPIOC, GPIO9, GPIOC, GPIO10, GPIOC, GPIO11, GPIOC, GPIO12); //PC8=CS, PC9=RS, PC10=WR, PC11=RD, PC12=LIGHT
 	Display.Light(1);
 	Display.Orientation(3);
-	Display.Clear(Color::FromRGB(255, 127, 0));
-	
+	Display.Clear(Color::Blue);
+	Display.Line(0,0,320,0, Color::White);
+	Display.Line(320,0,320,240, Color::White);
+	Display.Line(0,0,320,240, Color::White);
+	Display.Line(100,100,200,100, Color::Red);
+	Display.Line(200,100,200,200, Color::Red);
+	Display.Line(200,200,100,100, Color::Red);
+	Display.Rect(25,25, 225,225, Color::Green);
+	Display.Rect(50,50, 175,175, Color::Black, Color::White);
 	while(1){;}
 	return 0;
 }
