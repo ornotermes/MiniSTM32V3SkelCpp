@@ -168,8 +168,6 @@ lcdILI9325::lcdILI9325(uint32_t portMSB, uint32_t portLSB, uint32_t portCS, uint
 	_regWrite(0x0007,0x0133); //Display Control 1
 	for (int i = 0; i < 50000; i++)__asm__("nop");
 	
-	Orientation(0);
-		
 }
 void lcdILI9325::Light(bool state)
 {
@@ -319,5 +317,15 @@ void lcdILI9325::Set(uint16_t x, uint16_t y, uint16_t color)
 	GoTo(x, y);
 	_regWrite(0x0022, color);
 }
+uint16_t lcdILI9325::Get(uint16_t x, uint16_t y)
+{
+	GoTo(x, y);
+	_regRead(0x0022);
+	uint16_t c, tc = _regRead(0x0022);
+	c = (tc & 0x07e0);
+	c |= (tc >> 11);
+	c |= (tc << 11);
+}
+
 
 #endif

@@ -78,6 +78,7 @@ public:
 	uint16_t GetY(void);
 	void Clear(uint16_t color);
 	void Set(uint16_t x, uint16_t y, uint16_t color);
+	uint16_t Get(uint16_t x, uint16_t y);
 };
 
 #include "lcd-ili9325.cpp"
