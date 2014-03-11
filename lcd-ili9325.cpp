@@ -300,7 +300,7 @@ uint16_t lcdILI9325::GetY(void)
 void lcdILI9325::Clear(uint16_t color)
 {	
 
-	/*const uint16_t w = GetWidth();
+	const uint16_t w = GetWidth();
 	const uint16_t h = GetWidth();
 	for	(uint16_t y = 0; y < h; y++)
 	{
@@ -310,19 +310,9 @@ void lcdILI9325::Clear(uint16_t color)
 		for (uint16_t x = 0; x < w; x++)
 		{
 			_dataWrite( color );
-			//for (uint16_t i = 0; i < 10000; i++);
 		}
 		_cs(1);
-	}*/
-	GoTo(0, 0);
-	_cs(0);
-	_command(0x0022);
-	for (uint32_t x = 0; x < (320*240); x++)
-	{
-		_dataWrite( color );
-		//for (uint16_t i = 0; i < 10000; i++);
 	}
-	_cs(1);
 }
 void lcdILI9325::Set(uint16_t x, uint16_t y, uint16_t color)
 {
