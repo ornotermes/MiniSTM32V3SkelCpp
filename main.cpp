@@ -19,64 +19,27 @@
  */
 #include "libopencm3/stm32/f1/rcc.h"
 #include "libopencm3/stm32/f1/gpio.h"
+
+#include "lcd-ili9325.hpp"
 /* Set STM32 to 72 MHz. */
 void clock_setup(void)
 {
 	rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
 	/* Enable GPIOC clock. */
+	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPAEN);
+	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPCEN);
 }
-
-class GpioClass{
-	uint32_t _port;
-	uint16_t _pin;
-public:
-	void Set(bool);
-	bool Get(void);
-	void Toggle(void);
-	void Mode(uint8_t, uint8_t);
-	GpioClass(uint32_t, uint16_t, uint8_t, uint8_t);
-};
-void GpioClass::Set(bool state)
-{
-	if (state) gpio_set(_port, _pin);
-	else gpio_clear(_port, _pin);
-}
-bool GpioClass::Get(void)
-{
-	return (bool)gpio_get(_port, _pin);
-}
-void GpioClass::Toggle(void)
-{
-	gpio_toggle(_port, _pin);
-}
-void GpioClass::Mode(uint8_t mode, uint8_t conf)
-{
-	gpio_set_mode(_port, mode, conf, _pin);
-}
-GpioClass::GpioClass(uint32_t port, uint16_t pin, uint8_t mode, uint8_t conf)
-{
-	_port = port;
-	_pin = pin;
-	Mode(mode, conf);
-}
-
-
 int main(void)
 {
-	int i;
-
 	clock_setup();
 	
-	GpioClass BackLight(GPIOC, GPIO12, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL);
-
-	//Blink the LED (PC12) on the board. 
-	while (1) {
-		BackLight.Toggle();
-		for (i = 0; i < 4000000; i++)	// Wait a bit.
-			;;
-	}
-
+	lcdILI9325 Display(GPIOB, GPIOC, GPIOC, GPIO8, GPIOC, GPIO9, GPIOC, GPIO10, GPIOC, GPIO11, GPIOC, GPIO12); //PC8=CS, PC9=RS, PC10=WR, PC11=RD, PC12=LIGHT
+	Display.Light(1);
+	Display.Orientation(3);
+	Display.Clear(Color::FromRGB(255, 127, 0));
+	
+	while(1){;}
 	return 0;
 }
