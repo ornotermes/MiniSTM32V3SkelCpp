@@ -24,6 +24,14 @@
 #include <cmath>
 #include <utility>
 
+struct Font
+{
+	uint8_t Width;
+	uint8_t Height;
+	uint8_t Space;
+	uint8_t Data[256*16];
+};
+
 namespace Color
 {
 	const uint16_t Black =		0x0000;
@@ -81,10 +89,11 @@ public:
 	void Clear(uint16_t color);
 	void Set(uint16_t x, uint16_t y, uint16_t color);
 	uint16_t Get(uint16_t x, uint16_t y);
-	void Fill (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
-	void Line (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
-	void Rect (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
-	void Rect (uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
+	void Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
+	void String(uint16_t x, uint16_t y, Font * font, uint16_t color, uint16_t back);
 };
 
 #include "lcd-ili9325.cpp"

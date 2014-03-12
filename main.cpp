@@ -21,6 +21,7 @@
 #include "libopencm3/stm32/f1/gpio.h"
 
 #include "lcd-ili9325.hpp"
+#include "font6x12.hpp"
 /* Set STM32 to 72 MHz. */
 void clock_setup(void)
 {
@@ -47,6 +48,7 @@ int main(void)
 	Display.Line(200,200,100,100, Color::Red);
 	Display.Rect(25,25, 225,225, Color::Green);
 	Display.Rect(50,50, 175,175, Color::Black, Color::White);
+	if(Font6x12.Space == 1) Display.Fill(0,0, 16,16, Color::Red);
 	while(1){;}
 	return 0;
 }
