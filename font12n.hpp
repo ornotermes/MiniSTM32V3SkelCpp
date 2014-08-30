@@ -1,11 +1,14 @@
 /*
-	Copyright (C) 2012 Dimitar Toshkov Zhekov
-	Copyright (C) 2012,2014 Rikard Lindström
+	bdf2hpp - Extract data from bitmap font to header format
+	Command: ./bdf2hpp.py -f fonts/ter-u12n.bdf -n Font12n
+	ter-u12n
+	-xos4-Terminus-Medium-R-Normal--12-120-72-72-C-60-ISO10646-1
+	Copyright (C) 2014 Dimitar Toshkov Zhekov
 	Licensed under the SIL Open Font License, Version 1.1
 */
-#ifndef FONT6X12_HPP
-#define FONT6X12_HPP
-static const Font Font6x12
+#ifndef FONT12N_HPP
+#define FONT12N_HPP
+static const Font Font12n
 {
 	6,
 	12,
@@ -392,7 +395,7 @@ static const Font Font6x12
 		//thorn: 254
 		0x00, 0x00, 0x80, 0x80, 0xF0, 0x88, 0x88, 0x88, 0x88, 0xF0, 0x80, 0x80, 
 		//ydieresis: 255
-		0x00, 0x00, 0x50, 0x50, 0x88, 0x88, 0x88, 0x88, 0x88, 0x78, 0x08, 0x70,
+		0x00, 0x00, 0x50, 0x50, 0x88, 0x88, 0x88, 0x88, 0x88, 0x78, 0x08, 0x70, 
 	}
 };
 #endif

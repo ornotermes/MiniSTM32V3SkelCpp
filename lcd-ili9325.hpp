@@ -25,7 +25,7 @@ struct Font
 	uint8_t Width;
 	uint8_t Height;
 	uint8_t Space;
-	uint8_t Data[256*16];
+	uint8_t Data[224*16];
 };
 typedef struct Image Image;
 struct Image
@@ -43,12 +43,20 @@ struct Image
 #include <utility>
 #include <cstdarg>
 
-#include "font6x12.hpp"
+#include "font12n.hpp"
+#include "font16n.hpp"
+#include "font16b.hpp"
 
-Font Fonts[] =
+static const Font Fonts[] =
 {
-	#ifdef FONT6X12_HPP
-		Font6x12,
+	#ifdef FONT12N_HPP
+		//Font12n,
+	#endif
+	#ifdef FONT16N_HPP
+		//Font16n,
+	#endif
+	#ifdef FONT16B_HPP
+		//Font16b,
 	#endif
 };
 
@@ -83,7 +91,7 @@ class lcdILI9325
 	uint16_t _textX = 0, _textY=0, _textX1 = 0, _textY1 = 0, _textX2 = 0, _textY2 = 0, _overflowX = 0, _overflowY = 0;
 	uint16_t _textColor = Color::White, _backColor = Color::Black;
 	
-	uint8_t _font = 0;
+	const Font *_font = &Font12n;
 	
 	uint32_t _portMSB, _portLSB, _portCS, _portRS, _portWR, _portRD, _portLED;
 	uint16_t _pinCS, _pinRS, _pinWR, _pinRD, _pinLED;
@@ -120,7 +128,7 @@ public:
 	void Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
-	void TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, uint8_t font);
+	void TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, const Font *font);
 	void PrintString(const char *chars);
 	void _printChar(char c);
 	void PrintFormat(char * fmt, ... );

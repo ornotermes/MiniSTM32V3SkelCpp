@@ -121,32 +121,32 @@ void lcdILI9325::_printChar(char c)
 		break;
 	case '\n':
 	case 13: //CR
-		_textY += Fonts[_font].Height;
+		_textY += _font->Height;
 		_textX = _textX1;
 		break;
 		
 	default:
 		c -= 32;
-		if ( (_textY + Fonts[_font].Height) > (_textY2) ) _textY = _textY1;
-		for	(uint16_t y = 0; y < Fonts[_font].Height; y++)
+		if ( (_textY + _font->Height) > (_textY2) ) _textY = _textY1;
+		for	(uint16_t y = 0; y < _font->Height; y++)
 		{
 			GoTo(_textX, _textY+y);
 			_cs(0);
 			_command(0x0022);
-			uint8_t charByte = Fonts[_font].Data[(c)*Fonts[_font].Height+y];
-			for (uint16_t x = 0; x < Fonts[_font].Width; x++)
+			uint8_t charByte = _font->Data[(c)*_font->Height+y];
+			for (uint16_t x = 0; x < _font->Width; x++)
 			{
 				if ( ( charByte & ( 1<<(8-x) ) ) > 0) color = _textColor;
 				else color = _backColor;
 				_dataWrite(color);
 			}
-			for (uint16_t x = 0; x < Fonts[_font].Space; x++)
+			for (uint16_t x = 0; x < _font->Space; x++)
 			{
 				_dataWrite(_backColor);
 			}
 			_cs(1);
 		}
-		_textX += Fonts[_font].Width + Fonts[_font].Space;
+		_textX += _font->Width + _font->Space;
 		break;
 	}
 }
@@ -415,7 +415,7 @@ void lcdILI9325::Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16
 }
 
 
-void lcdILI9325::TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, uint8_t font)
+void lcdILI9325::TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, const Font *font)
 {
 	_textX1 = x1;
 	_textY1 = y1;
@@ -635,7 +635,7 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 
 void lcdILI9325::ClearLine()
 {
-	Fill( _textX1, _textY, _textX2, _textY + Fonts[_font].Height, _backColor );
+	Fill( _textX1, _textY, _textX2, _textY + _font->Height, _backColor );
 }
 
 //Draw image generated with img2h.py

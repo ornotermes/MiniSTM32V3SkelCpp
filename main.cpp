@@ -22,7 +22,7 @@
 
 #include "lcd-ili9325.hpp"
 
-//#include "shock.hpp"
+#include "shock.hpp"
 
 /* Set STM32 to 72 MHz. */
 void clock_setup(void)
@@ -38,7 +38,7 @@ int main(void)
 {
 	clock_setup();
 	
-	/*lcdILI9325 Display(GPIOB, GPIOC, GPIOC, GPIO8, GPIOC, GPIO9, GPIOC, GPIO10, GPIOC, GPIO11, GPIOC, GPIO12); //PC8=CS, PC9=RS, PC10=WR, PC11=RD, PC12=LIGHT
+	lcdILI9325 Display(GPIOB, GPIOC, GPIOC, GPIO8, GPIOC, GPIO9, GPIOC, GPIO10, GPIOC, GPIO11, GPIOC, GPIO12); //PC8=CS, PC9=RS, PC10=WR, PC11=RD, PC12=LIGHT
 	Display.Orientation(3);
 	Display.Clear(Color::Blue);
 	Display.Light(1);
@@ -50,18 +50,20 @@ int main(void)
 	Display.Line(200,200,100,100, Color::Red);
 	Display.Rect(25,25, 225,225, Color::Green);
 	Display.Rect(50,50, 175,175, Color::Black, Color::White);
-	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::Green, Color::Black, 0);
+	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::Green, Color::Black, &Font16b);
 	Display._printChar('1');
 	Display._printChar('B');
 	Display._printChar('c');
 	Display.PrintString("X");
 	Display.PrintString(" Hello, world!\n");
+	//Display.SetFont(2);
+	Display.PrintString("Hello, world!\n");
 	//Display.ClearLine();
 	//Display.PrintFormat("Char: %c, Str: %s \n", 'y', "Yes!");
 	//Display.PrintFormat("Int: %_i, uInt: %u \n", -34, -34);
 	//Display.PrintFormat("hex: 0x%04x, HEX: 0x%X\n", 43, 47);
 	Display.ImageDraw( shock , 100, 100);
-	*/
+	
 	while(1){;}
 	return 0;
 }
