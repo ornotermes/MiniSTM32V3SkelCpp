@@ -18,18 +18,38 @@
 #ifndef LCD_ILI9325_H
 #define LCD_ILI9325_H
 
-//---- Includes headers ------------------------------------------------------//
-
-#include <libopencm3/stm32/f1/gpio.h>
-#include <cmath>
-#include <utility>
-
+//---- Structs needed by some external files ---------------------------------//
+typedef struct Font Font;
 struct Font
 {
 	uint8_t Width;
 	uint8_t Height;
 	uint8_t Space;
 	uint8_t Data[256*16];
+};
+typedef struct Image Image;
+struct Image
+{
+	const uint16_t (*Width);
+	const uint16_t *Height;
+	const uint16_t *Palette;
+	const uint8_t *Data;
+};
+
+//---- Includes headers ------------------------------------------------------//
+
+#include <libopencm3/stm32/f1/gpio.h>
+#include <cmath>
+#include <utility>
+#include <cstdarg>
+
+#include "font6x12.hpp"
+
+Font Fonts[] =
+{
+	#ifdef FONT6X12_HPP
+		Font6x12,
+	#endif
 };
 
 namespace Color
@@ -53,11 +73,17 @@ namespace Color
 	uint16_t FromRGB(uint8_t red, uint8_t green, uint8_t blue);
 };
 
-class lcdILI9325{
+class lcdILI9325
+{
 	const uint16_t _width = 240;
 	const uint16_t _height = 320;
 	uint8_t	_rotation = 0;
 	uint16_t _model;
+	
+	uint16_t _textX = 0, _textY=0, _textX1 = 0, _textY1 = 0, _textX2 = 0, _textY2 = 0, _overflowX = 0, _overflowY = 0;
+	uint16_t _textColor = Color::White, _backColor = Color::Black;
+	
+	uint8_t _font = 0;
 	
 	uint32_t _portMSB, _portLSB, _portCS, _portRS, _portWR, _portRD, _portLED;
 	uint16_t _pinCS, _pinRS, _pinWR, _pinRD, _pinLED;
@@ -77,6 +103,7 @@ class lcdILI9325{
 	void _regWrite(uint16_t reg, uint16_t data);
 	uint16_t _regRead(uint16_t reg);
 	
+	
 public:
 	lcdILI9325(uint32_t portMSB, uint32_t portLSB, uint32_t portCS, uint16_t pinCS, uint32_t portRS, uint16_t pinRS, uint32_t portWR, uint16_t pinWR, uint32_t portRD, uint16_t pinRD, uint32_t portLED, uint16_t pinLED);
 	void Light(bool state);
@@ -93,7 +120,12 @@ public:
 	void Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
-	void String(uint16_t x, uint16_t y, Font * font, uint16_t color, uint16_t back);
+	void TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, uint8_t font);
+	void PrintString(const char *chars);
+	void _printChar(char c);
+	void PrintFormat(char * fmt, ... );
+	void ClearLine(void);
+	void ImageDraw(Image img, uint16_t destX, uint16_t destY);
 };
 
 #include "lcd-ili9325.cpp"

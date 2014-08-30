@@ -3,7 +3,9 @@
 	Copyright (C) 2012,2014 Rikard Lindström
 	Licensed under the SIL Open Font License, Version 1.1
 */
-static const Font Font6x12 = 
+#ifndef FONT6X12_HPP
+#define FONT6X12_HPP
+static const Font Font6x12
 {
 	6,
 	12,
@@ -393,3 +395,4 @@ static const Font Font6x12 =
 		0x00, 0x00, 0x50, 0x50, 0x88, 0x88, 0x88, 0x88, 0x88, 0x78, 0x08, 0x70,
 	}
 };
+#endif

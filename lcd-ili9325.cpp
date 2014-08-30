@@ -112,6 +112,45 @@ uint16_t lcdILI9325::_regRead(uint16_t reg)
 	return data;
 }
 
+void lcdILI9325::_printChar(char c)
+{
+	uint16_t color = 0;
+	switch(c)
+	{
+	case 0:
+		break;
+	case '\n':
+	case 13: //CR
+		_textY += Fonts[_font].Height;
+		_textX = _textX1;
+		break;
+		
+	default:
+		c -= 32;
+		if ( (_textY + Fonts[_font].Height) > (_textY2) ) _textY = _textY1;
+		for	(uint16_t y = 0; y < Fonts[_font].Height; y++)
+		{
+			GoTo(_textX, _textY+y);
+			_cs(0);
+			_command(0x0022);
+			uint8_t charByte = Fonts[_font].Data[(c)*Fonts[_font].Height+y];
+			for (uint16_t x = 0; x < Fonts[_font].Width; x++)
+			{
+				if ( ( charByte & ( 1<<(8-x) ) ) > 0) color = _textColor;
+				else color = _backColor;
+				_dataWrite(color);
+			}
+			for (uint16_t x = 0; x < Fonts[_font].Space; x++)
+			{
+				_dataWrite(_backColor);
+			}
+			_cs(1);
+		}
+		_textX += Fonts[_font].Width + Fonts[_font].Space;
+		break;
+	}
+}
+
 lcdILI9325::lcdILI9325(uint32_t portMSB, uint32_t portLSB, uint32_t portCS, uint16_t pinCS, uint32_t portRS, uint16_t pinRS, uint32_t portWR, uint16_t pinWR, uint32_t portRD, uint16_t pinRD, uint32_t portLED, uint16_t pinLED)
 {
 	_portMSB = portMSB;
@@ -375,4 +414,244 @@ void lcdILI9325::Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16
 	Rect(x1,y1, x2,y2, color);
 }
 
+
+void lcdILI9325::TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, uint8_t font)
+{
+	_textX1 = x1;
+	_textY1 = y1;
+	_textX2 = x2;
+	_textY2 = y2;
+	
+	_textColor = color;
+	_backColor = back;
+	
+	_font = font;
+}
+void lcdILI9325::PrintString(const char *chars)
+{
+	for(;(*chars) != 0 ; chars++)
+	{
+    		_printChar(*chars);
+	}
+}
+void lcdILI9325::PrintFormat( char * fmt, ... )
+{
+	va_list args;
+	char *p; //Pointer to fmt char
+	char format = 0; //In format reading mode
+	char formatFill = ' '; //Fill character
+	char formatSign = 0; //Always sign (+/-)
+	char formatReset = 0; //Reset all settings when we are done with a format
+	char formatOutput[13]; //Temporary output buffer
+	unsigned char i = 0; //For flipping formatOutput
+	int formatPadding = 0; //How many charecters the format should use
+	
+	int formatInt = 0;
+	unsigned int formatUnsigned = 0;
+	char *formatString;
+	
+	va_start (args, fmt);
+	
+	for(p=fmt; *p>0; p++)
+	{	
+		if (*p == '%')
+		{
+			format = 1;
+			p++;
+		}
+		
+
+		if(format)
+		{
+			switch(*p)
+			{				
+			case 'c':
+				formatInt = va_arg( args, int );
+				_printChar(formatInt);
+				formatReset = 1;
+				break;
+				
+			case 'd':
+			case 'i':
+				formatInt = va_arg( args, int ); //Load next number from argument list
+				if(formatSign && formatInt>=0) _printChar('+'); //Print + if sign is requested and number is poitive
+				if(formatInt<0)
+				{
+					_printChar('-'); //always show - if number i negative
+					formatInt = formatInt - formatInt - formatInt; //make number positive to make modulud and division to work
+				}
+				i = 0;
+				if( formatInt == 0 )
+				{
+					formatOutput[i] = '0'; //If number is zero show that, the function for other numbers won't do it
+					i++;
+				}
+				for(; formatInt; i++) //Convert the number, when formatInt == 0 there is nothing more to convert
+				{
+					char mod = formatInt % 10; //Extract least significant base 10 digit
+					formatOutput[i] = ('0'+mod); //Add the numerical value of '0' to make a character
+					formatInt = (formatInt - mod) / 10; //Divide by 10 to create a new least significant digit
+				}
+				for(int j = 0; j < (formatPadding - i - formatSign); j++) //calculate about of padding needed.
+				{
+					_printChar(formatFill);
+				}
+				for( ; i > 0; i--) _printChar(formatOutput[i-1]); //Print the last extracted digit first (that was most significat digit in the original number)
+				formatReset = 1; //We are done with this format, clean up
+				break;
+				
+			case 'u':
+				formatUnsigned = va_arg( args, unsigned int );
+				i = 0;
+				if( formatUnsigned == 0 )
+				{
+					formatOutput[i] = ('0');
+					i++;
+				}
+				for(; formatUnsigned; i++)
+				{
+					char mod = formatUnsigned % 10;
+					formatOutput[i] = ('0'+mod);
+					formatUnsigned = (formatUnsigned - mod) / 10;
+				}
+				for(int j = 0; j < (formatPadding - i); j++) 
+				{
+					_printChar(formatFill);
+				}
+				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				formatReset = 1;
+				break;
+				
+			case 'x':
+				formatUnsigned = va_arg( args, unsigned int );
+				i = 0;
+				if( formatUnsigned == 0 )
+				{
+					formatOutput[i] = ('0');
+					i++;
+				}
+				for(; formatUnsigned; i++)
+				{
+					char mod = formatUnsigned % 16;
+					if (mod > 9) formatOutput[i] = (char)('a'+mod-10);
+					else formatOutput[i] = ('0'+mod);
+					formatUnsigned = (formatUnsigned - mod) / 16;
+				}
+				for(int j = 0; j < (formatPadding - i); j++) 
+				{
+					_printChar(formatFill);
+				}
+				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				formatReset = 1;
+				break;
+				
+			case 'X':
+				formatUnsigned = va_arg( args, unsigned int );
+				i = 0;
+				if( formatUnsigned == 0 )
+				{
+					formatOutput[i] = ('0');
+					i++;
+				}
+				for(i = 0; formatUnsigned; i++)
+				{
+					char mod = formatUnsigned % 16;
+					if (mod > 9) formatOutput[i] = (char)('A'+mod-10);
+					else formatOutput[i] = ('0'+mod);
+					formatUnsigned = (formatUnsigned - mod) / 16;
+				}
+				for(int j = 0; j < (formatPadding - i); j++) 
+				{
+					_printChar(formatFill);
+				}
+				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				formatReset = 1;
+				break;
+				
+			case 'o':
+				formatUnsigned = va_arg( args, unsigned int );
+				i = 0;
+				if( formatUnsigned == 0 )
+				{
+					formatOutput[i] = ('0');
+					i++;
+				}
+				for(i = 0; formatUnsigned; i++)
+				{
+					char mod = formatUnsigned % 8;
+					formatOutput[i] = ('0'+mod);
+					formatUnsigned = (formatUnsigned - mod) / 8;
+				}
+				for(int j = 0; j < (formatPadding - i); j++) 
+				{
+					_printChar(formatFill);
+				}
+				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				formatReset = 1;
+				break;
+				
+			case 's':
+				formatString = va_arg( args, char * );
+				PrintString(formatString);
+				formatReset = 1;
+				break;
+			
+			case '_':
+				formatFill='_';
+				break;
+
+			case '0':
+				if(formatPadding == 0) formatFill='0';
+			case '1' ... '9':
+				formatPadding *= 10;
+				formatPadding += ((*p) - '0');
+				break;
+				
+			case '+':
+				formatSign = 1;
+				break;
+				
+			case '%':
+				_printChar('%');
+				formatReset = 1;
+				break;
+			}
+			
+			if(formatReset)
+			{
+				//Restore everything
+				format = 0;
+				formatFill = ' ';
+				formatSign = 0;
+				formatPadding = 0;
+				formatOutput[0] = '\0';
+				formatReset = 0;
+			}
+		}
+		else _printChar(*p);
+	}
+	va_end(args);
+}
+
+void lcdILI9325::ClearLine()
+{
+	Fill( _textX1, _textY, _textX2, _textY + Fonts[_font].Height, _backColor );
+}
+
+//Draw image generated with img2h.py
+void lcdILI9325::ImageDraw(const Image img, uint16_t destX, uint16_t destY)
+{
+	
+	for (uint16_t y = 0; y < (*img.Height); y++)
+	{
+		GoTo(destX, destY+y);
+		_cs(0);
+		_command(0x0022);
+		for (uint16_t x = 0; x < (*img.Width); x++)
+		{
+			_dataWrite( *(img.Palette+ *(img.Data + (*img.Width)*y + x) ) );
+		}
+		_cs(1);
+	}
+}
 #endif
