@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma GCC diagnostic ignored "-Wwrite-strings"
+ 
 #include "libopencm3/stm32/f1/rcc.h"
 #include "libopencm3/stm32/f1/gpio.h"
 
@@ -29,7 +31,6 @@ void clock_setup(void)
 {
 	rcc_clock_setup_in_hse_8mhz_out_72mhz();
 
-	/* Enable GPIOC clock. */
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPAEN);
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
 	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPCEN);
@@ -42,7 +43,8 @@ int main(void)
 	Display.Orientation(3);
 	Display.Clear(Color::Blue);
 	Display.Light(1);
-	Display.Line(0,0,320,0, Color::White);
+	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::White, Color::Blue, &Font16n);
+	/*Display.Line(0,0,320,0, Color::White);
 	Display.Line(320,0,320,240, Color::White);
 	Display.Line(0,0,320,240, Color::White);
 	Display.Line(100,100,200,100, Color::Red);
@@ -50,19 +52,13 @@ int main(void)
 	Display.Line(200,200,100,100, Color::Red);
 	Display.Rect(25,25, 225,225, Color::Green);
 	Display.Rect(50,50, 175,175, Color::Black, Color::White);
-	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::Green, Color::Black, &Font16b);
-	Display._printChar('1');
-	Display._printChar('B');
-	Display._printChar('c');
-	Display.PrintString("X");
-	Display.PrintString(" Hello, world!\n");
-	//Display.SetFont(2);
+	*/
 	Display.PrintString("Hello, world!\n");
-	//Display.ClearLine();
-	//Display.PrintFormat("Char: %c, Str: %s \n", 'y', "Yes!");
-	//Display.PrintFormat("Int: %_i, uInt: %u \n", -34, -34);
-	//Display.PrintFormat("hex: 0x%04x, HEX: 0x%X\n", 43, 47);
-	Display.ImageDraw( shock , 100, 100);
+	Display.ClearLine();
+	Display.PrintFormat("Char: %c, Str: %s \n", 'y', "Yes!");
+	Display.PrintFormat("Int: %_i, uInt: %u \n", -34, -34);
+	Display.PrintFormat("hex: 0x%04x, HEX: 0x%X\n", 43, 47);
+	Display.ImageDraw( shock , 216, 146);
 	
 	while(1){;}
 	return 0;
