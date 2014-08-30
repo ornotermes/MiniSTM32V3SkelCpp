@@ -33,7 +33,7 @@ LIB_DIR		= $(TOOLCHAIN_DIR)/lib
 BIN_DIR		= $(TOOLCHAIN_DIR)/bin
 
 ARCH_FLAGS      = -mthumb -mcpu=cortex-m3 -msoft-float
-CFLAGS		+= -c -g -std=c++11 \
+CFLAGS		+= -fno-exceptions -c -g -std=c++11 \
 		   -Wall -Wextra \
 		   -Wredundant-decls \
 		   -Wundef -Wshadow \
