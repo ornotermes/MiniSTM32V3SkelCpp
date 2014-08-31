@@ -30,9 +30,16 @@ struct Font
 typedef struct Image Image;
 struct Image
 {
-	const uint16_t (*Width);
+	const uint16_t *Width;
 	const uint16_t *Height;
 	const uint16_t *Palette;
+	const uint8_t *Data;
+};
+typedef struct Mask Mask;
+struct Mask
+{
+	const uint16_t *Width;
+	const uint16_t *Height;
 	const uint8_t *Data;
 };
 
@@ -134,6 +141,7 @@ public:
 	void PrintFormat(char * fmt, ... );
 	void ClearLine(void);
 	void ImageDraw(Image img, uint16_t destX, uint16_t destY);
+	void MaskDraw(Mask m, uint16_t destX, uint16_t destY);
 };
 
 #include "lcd-ili9325.cpp"

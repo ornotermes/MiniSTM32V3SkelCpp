@@ -654,4 +654,30 @@ void lcdILI9325::ImageDraw(const Image img, uint16_t destX, uint16_t destY)
 		_cs(1);
 	}
 }
+//Draw mask generated with img2h.py
+void lcdILI9325::MaskDraw(const Mask m, uint16_t destX, uint16_t destY)
+{
+	uint8_t bit = 0;
+	uint8_t pixels = 0;
+	uint16_t byte = 0;
+	for	(uint16_t y = 0; y < (*m.Height); y++)
+	{
+		GoTo(destX, destY+y);
+		_cs(0);
+		_command(0x0022);
+		for (uint16_t x = 0; x < (*m.Width); x++)
+		{
+			if (bit == 0)
+			{
+				pixels = *(m.Data + byte);
+				byte++;
+				bit = 8;
+			}
+			bit--;
+			if( pixels & (1<<bit)) _dataWrite(_textColor);
+			else _dataWrite(_backColor);
+		}
+		_cs(1);
+	}
+}
 #endif
