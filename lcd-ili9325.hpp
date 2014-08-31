@@ -122,6 +122,8 @@ public:
 	void SetTextColor(uint16_t color);
 	void SetBackColor(uint16_t color);
 	void SetFont(const Font *font);
+	uint16_t GetTextColor(void);
+	uint16_t GetBackColor(void);
 	void Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);

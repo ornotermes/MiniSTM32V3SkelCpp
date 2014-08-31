@@ -376,6 +376,14 @@ void lcdILI9325::SetFont(const Font *font)
 {
 	_font = font;
 }
+uint16_t lcdILI9325::GetTextColor(void)
+{
+	return _textColor;
+}
+uint16_t lcdILI9325::GetBackColor(void)
+{
+	return _backColor;
+}
 
 void lcdILI9325::Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
 {
