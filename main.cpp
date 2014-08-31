@@ -23,6 +23,7 @@
 #include "libopencm3/stm32/f1/gpio.h"
 
 #include "lcd-ili9325.hpp"
+#include "touch-ads7843.hpp"
 
 #include "shock.hpp"
 
@@ -40,10 +41,13 @@ int main(void)
 	clock_setup();
 	
 	lcdILI9325 Display(GPIOB, GPIOC, GPIOC, GPIO8, GPIOC, GPIO9, GPIOC, GPIO10, GPIOC, GPIO11, GPIOC, GPIO12); //PC8=CS, PC9=RS, PC10=WR, PC11=RD, PC12=LIGHT
+	TouchADS7843 Touch;
+	
 	Display.Orientation(3);
 	Display.Clear(Color::Blue);
 	Display.Light(1);
-	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::White, Color::Blue, &Font16n);
+	Display.TextArea(0,0, Display.GetWidth(),Display.GetHeight(), Color::White, Color::Blue, &Font12n);
+	
 	/*Display.Line(0,0,320,0, Color::White);
 	Display.Line(320,0,320,240, Color::White);
 	Display.Line(0,0,320,240, Color::White);
@@ -53,13 +57,25 @@ int main(void)
 	Display.Rect(25,25, 225,225, Color::Green);
 	Display.Rect(50,50, 175,175, Color::Black, Color::White);
 	*/
+	/*
 	Display.PrintString("Hello, world!\n");
 	Display.ClearLine();
 	Display.PrintFormat("Char: %c, Str: %s \n", 'y', "Yes!");
 	Display.PrintFormat("Int: %_i, uInt: %u \n", -34, -34);
 	Display.PrintFormat("hex: 0x%04x, HEX: 0x%X\n", 43, 47);
-	Display.ImageDraw( shock , 216, 146);
+	*/
 	
-	while(1){;}
+	if (!Touch.ReadRTC())Touch.Calibrate(&Display);
+	
+	Display.ImageDraw( shock, 216, 146);
+	
+	while(1)
+	{
+		TouchADS7843::Event e = Touch.Task();
+		if(e.Pen)
+		{
+			Display.Set(e.X, e.Y, Display.GetTextColor());
+		}
+	}
 	return 0;
 }
