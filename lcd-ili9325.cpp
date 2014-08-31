@@ -112,7 +112,7 @@ uint16_t lcdILI9325::_regRead(uint16_t reg)
 	return data;
 }
 
-void lcdILI9325::_printChar(char c)
+void lcdILI9325::PrintChar(char c)
 {
 	uint16_t color = 0;
 	switch(c)

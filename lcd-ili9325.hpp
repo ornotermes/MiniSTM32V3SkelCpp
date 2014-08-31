@@ -123,8 +123,8 @@ public:
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
 	void TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, const Font *font);
+	void PrintChar(char c);
 	void PrintString(const char *chars);
-	void _printChar(char c);
 	void PrintFormat(char * fmt, ... );
 	void ClearLine(void);
 	void ImageDraw(Image img, uint16_t destX, uint16_t destY);
