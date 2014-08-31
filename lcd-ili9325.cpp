@@ -292,7 +292,8 @@ uint16_t tx, ty;
 			break;
 	}
 	_regWrite(0x0020,tx); //Native X pos
-	_regWrite(0x0021,ty); //Native Y pos	
+	_regWrite(0x0021,ty); //Native Y pos
+
 }
 uint16_t lcdILI9325::GetX(void)
 {
@@ -340,6 +341,12 @@ void lcdILI9325::Clear(uint16_t color)
 	const uint16_t w = GetWidth();
 	const uint16_t h = GetWidth();
 	Fill(0,0, w,h, color);
+	GoTo(0,0);
+	TextGoTo(0,0);
+}
+void lcdILI9325::Clear(void)
+{	
+	Clear(_backColor);
 }
 void lcdILI9325::Set(uint16_t x, uint16_t y, uint16_t color)
 {
@@ -355,6 +362,19 @@ uint16_t lcdILI9325::Get(uint16_t x, uint16_t y)
 	c |= (tc >> 11);
 	c |= (tc << 11);
 	return c;
+}
+
+void lcdILI9325::SetTextColor(uint16_t color)
+{
+	_textColor = color;
+}
+void lcdILI9325::SetBackColor(uint16_t color)
+{
+	_backColor = color;
+}
+void lcdILI9325::SetFont(const Font *font)
+{
+	_font = font;
 }
 
 void lcdILI9325::Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
@@ -427,11 +447,16 @@ void lcdILI9325::TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, ui
 	
 	_font = font;
 }
+void lcdILI9325::TextGoTo(uint16_t x, uint16_t y)
+{
+	_textX = _textX1 + x;
+	_textY = _textY1 + y;
+}
 void lcdILI9325::PrintString(const char *chars)
 {
 	for(;(*chars) != 0 ; chars++)
 	{
-    		_printChar(*chars);
+    		PrintChar(*chars);
 	}
 }
 void lcdILI9325::PrintFormat( char * fmt, ... )
@@ -467,17 +492,17 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 			{				
 			case 'c':
 				formatInt = va_arg( args, int );
-				_printChar(formatInt);
+				PrintChar(formatInt);
 				formatReset = 1;
 				break;
 				
 			case 'd':
 			case 'i':
 				formatInt = va_arg( args, int ); //Load next number from argument list
-				if(formatSign && formatInt>=0) _printChar('+'); //Print + if sign is requested and number is poitive
+				if(formatSign && formatInt>=0) PrintChar('+'); //Print + if sign is requested and number is poitive
 				if(formatInt<0)
 				{
-					_printChar('-'); //always show - if number i negative
+					PrintChar('-'); //always show - if number i negative
 					formatInt = formatInt - formatInt - formatInt; //make number positive to make modulud and division to work
 				}
 				i = 0;
@@ -494,9 +519,9 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				}
 				for(int j = 0; j < (formatPadding - i - formatSign); j++) //calculate about of padding needed.
 				{
-					_printChar(formatFill);
+					PrintChar(formatFill);
 				}
-				for( ; i > 0; i--) _printChar(formatOutput[i-1]); //Print the last extracted digit first (that was most significat digit in the original number)
+				for( ; i > 0; i--) PrintChar(formatOutput[i-1]); //Print the last extracted digit first (that was most significat digit in the original number)
 				formatReset = 1; //We are done with this format, clean up
 				break;
 				
@@ -516,9 +541,9 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				}
 				for(int j = 0; j < (formatPadding - i); j++) 
 				{
-					_printChar(formatFill);
+					PrintChar(formatFill);
 				}
-				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				for( ; i > 0; i--) PrintChar(formatOutput[i-1]);
 				formatReset = 1;
 				break;
 				
@@ -539,9 +564,9 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				}
 				for(int j = 0; j < (formatPadding - i); j++) 
 				{
-					_printChar(formatFill);
+					PrintChar(formatFill);
 				}
-				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				for( ; i > 0; i--) PrintChar(formatOutput[i-1]);
 				formatReset = 1;
 				break;
 				
@@ -562,9 +587,9 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				}
 				for(int j = 0; j < (formatPadding - i); j++) 
 				{
-					_printChar(formatFill);
+					PrintChar(formatFill);
 				}
-				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				for( ; i > 0; i--) PrintChar(formatOutput[i-1]);
 				formatReset = 1;
 				break;
 				
@@ -584,9 +609,9 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				}
 				for(int j = 0; j < (formatPadding - i); j++) 
 				{
-					_printChar(formatFill);
+					PrintChar(formatFill);
 				}
-				for( ; i > 0; i--) _printChar(formatOutput[i-1]);
+				for( ; i > 0; i--) PrintChar(formatOutput[i-1]);
 				formatReset = 1;
 				break;
 				
@@ -612,7 +637,7 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				break;
 				
 			case '%':
-				_printChar('%');
+				PrintChar('%');
 				formatReset = 1;
 				break;
 			}
@@ -628,7 +653,7 @@ void lcdILI9325::PrintFormat( char * fmt, ... )
 				formatReset = 0;
 			}
 		}
-		else _printChar(*p);
+		else PrintChar(*p);
 	}
 	va_end(args);
 }

@@ -116,13 +116,18 @@ public:
 	uint16_t GetX(void);
 	uint16_t GetY(void);
 	void Clear(uint16_t color);
+	void Clear(void);
 	void Set(uint16_t x, uint16_t y, uint16_t color);
 	uint16_t Get(uint16_t x, uint16_t y);
+	void SetTextColor(uint16_t color);
+	void SetBackColor(uint16_t color);
+	void SetFont(const Font *font);
 	void Fill(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Line(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 	void Rect(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t fill);
 	void TextArea(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color, uint16_t back, const Font *font);
+	void TextGoTo(uint16_t x, uint16_t y);
 	void PrintChar(char c);
 	void PrintString(const char *chars);
 	void PrintFormat(char * fmt, ... );
