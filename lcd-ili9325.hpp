@@ -54,19 +54,6 @@ struct Mask
 #include "font16n.hpp"
 #include "font16b.hpp"
 
-static const Font Fonts[] =
-{
-	#ifdef FONT12N_HPP
-		//Font12n,
-	#endif
-	#ifdef FONT16N_HPP
-		//Font16n,
-	#endif
-	#ifdef FONT16B_HPP
-		//Font16b,
-	#endif
-};
-
 namespace Color
 {
 	const uint16_t Black =		0x0000;
