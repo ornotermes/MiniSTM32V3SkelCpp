@@ -21,7 +21,7 @@ import sys
 import argparse
 from PIL import Image, ImageDraw
 
-print("// img2hpp - Convert image to header with a colormap in 16 bit RRRRRGGGGGGBBBBB")
+print("// img2hpp - Convert image to header either with a colormap in 16 bit RRRRRGGGGGGBBBBB or 1-bit mask.")
 print("// Command: %s" % " ".join(sys.argv))
 
 def argParser():
@@ -48,11 +48,24 @@ if arg["mask"]:
 	
 	if(len(arg["output"]) > 0):
 		newImg.save(arg["output"])
-
-	print ("static const uint16_t {0}_width = {1};".format(arg["name"], newImg.size[0]))
-	print ("static const uint16_t {0}_height = {1};".format(arg["name"], newImg.size[1]))
-	
-	print ("static const uint8_t {0}_data[] = {{".format(arg["name"]))
+		
+	print ("#ifndef {0}_HPP".format(arg["name"].upper()))
+	print ("#define {0}_HPP".format(arg["name"].upper()))
+	print ("typedef struct {0}_struct {0}_type;".format(arg["name"]))
+	print ("struct {0}_struct".format(arg["name"]))
+	print ("{")
+	print ("\tuint16_t Width;")
+	print ("\tuint16_t Height;")
+	s = (newImg.size[0]*newImg.size[1]) /8
+	if ((newImg.size[0]*newImg.size[1]) % 8):
+		s+=1
+	print ("\tuint8_t Data[{0}];".format( s ))
+	print ("};")
+	print ("static const {0}_type {0}_data".format(arg["name"]))
+	print ("{")
+	print ("\t{1},".format(arg["name"], newImg.size[0]))
+	print ("\t{1},".format(arg["name"], newImg.size[1]))
+	print ("\t{")
 	imgString=""
 	i=0
 	pixels = 0
@@ -64,10 +77,18 @@ if arg["mask"]:
 			i = 0
 			pixels = 0
 		if (len(imgString) > 59):
-			print ("\t" + imgString)
+			print ("\t\t" + imgString)
 			imgString = ""
-	print ("\t" + imgString)
-	print ("};");
+	print ("\t\t" + imgString)
+	print ("}")
+	print ("};")
+	print ("Mask {0}".format(arg["name"]))
+	print ("{");
+	print ("\t.Width = &{0}_data.Width,".format(arg["name"]))
+	print ("\t.Height = &{0}_data.Height,".format(arg["name"]))
+	print ("\t.Data = &{0}_data.Data[0]".format(arg["name"]))
+	print ("};")
+	print ("#endif")
 	
 else:
 	if arg["dither"]:	
